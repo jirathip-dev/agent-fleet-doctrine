@@ -27,6 +27,7 @@ Fleet orchestration discipline. Load this whenever you will run more than one co
 10. **Issue hygiene.** New issue for every discovery. `Refs #N`, not `Fixes #N`, when an issue must stay open past a merge.
 11. **Brief/manifest composition.** Self-contained brief; role, model, skills, brief, harness are separate axes, composed in a fixed order. Long briefs go in files, not inline prompts.
 12. **Status reporting.** Four buckets — integrated/shipped, produced-not-integrated, in flight, unverified/blockers. Derive totals with commands, never mentally.
+13. **Skill selection.** Worker context carries explicitly selected, narrow skills (a separate axis from role/model). Role-gated; never blanket-injected; static default + named override; a lane that should have gotten a skill but didn't is a spawn defect.
 
 ## Boundaries
 
