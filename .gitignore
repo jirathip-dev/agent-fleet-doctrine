@@ -1,0 +1,17 @@
+# OS / editor cruft
+.DS_Store
+._*
+
+# Tailscale / wireguard identity material — never commit
+*.ts.net.key
+*.ts.net.crt
+*.ts.net.*
+*.tail*ts.net*
+*.key
+*.crt
+*.pem
+
+# Logs and temp
+*.log
+tmp/
+.tmp/

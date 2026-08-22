@@ -1,0 +1,172 @@
+#!/usr/bin/env bash
+#
+# doctrine-sync — intake the public agent-fleet-doctrine core into a fleet
+# skill path, so the fleet pulls from the public repo as the source of truth.
+#
+# This script is the INTAKE side of the split refactor. The public repo is
+# upstream; the private overlay (fleet-operations) stays untouched. The script
+# reports, and with --apply actually installs, the public core (SKILL.md +
+# doctrine/ + adapters/) into a read-only skill directory the fleet loads.
+#
+# SAFETY:
+#   * Dry-run by default. --apply is the only mode that writes anything.
+#   * Never deletes anything. Never touches the private overlay.
+#   * Idempotent: running twice with no change reports "in sync".
+#
+# USAGE:
+#   bin/doctrine-sync [--apply] [--target DIR] [--pin FILE]
+#                     [--upstream URL] [--no-fetch] [--quiet]
+#   bin/doctrine-sync --help
+#
+set -euo pipefail
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+# ---------------------------------------------------------------------------
+# Defaults. portable per-user paths; override with --target / --pin / --upstream.
+# Both override with --target / --pin.
+# ---------------------------------------------------------------------------
+TARGET="${FLEET_DOCTRINE_SKILL_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/fleet-doctrine}"
+PIN="${FLEET_OPERATIONS_PIN:-${XDG_DATA_HOME:-$HOME/.local/share}/fleet-operations/doctrine-pin}"
+UPSTREAM="${FLEET_DOCTRINE_UPSTREAM:-$REPO_ROOT}"
+APPLY=0
+DO_FETCH=1
+QUIET=0
+
+# The public core = the doctrine as a skill. This is what installs.
+CORE_PATHS=( SKILL.md doctrine adapters README.md LICENSE CONTRIBUTING.md )
+
+usage() {
+  cat <<'EOF'
+doctrine-sync — intake the public fleet doctrine core into a fleet skill path.
+
+Dry-run by default (reports only). --apply performs the install. Never deletes
+anything and never touches the private overlay.
+
+Options:
+  --apply         Install the public core into --target (default: report only).
+  --target DIR    Destination skill directory (default: the fleet-doctrine path).
+  --pin FILE      Path to the private overlay's doctrine-pin (default: the
+                  fleet-operations path).
+  --upstream URL  Where to fetch the public repo from (default: this repo).
+  --no-fetch      Skip `git fetch` of upstream.
+  --quiet         Suppress per-file detail.
+  -h, --help      Show this help.
+EOF
+}
+
+log() { [[ "$QUIET" == "1" ]] || echo "$*"; }
+
+# ---------------------------------------------------------------------------
+# Arg parsing
+# ---------------------------------------------------------------------------
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --apply)      APPLY=1; shift ;;
+    --target)     TARGET="$2"; shift 2 ;;
+    --pin)        PIN="$2"; shift 2 ;;
+    --upstream)   UPSTREAM="$2"; shift 2 ;;
+    --no-fetch)   DO_FETCH=0; shift ;;
+    --quiet|-q)   QUIET=1; shift ;;
+    -h|--help)    usage; exit 0 ;;
+    *) echo "doctrine-sync: unknown argument: $1" >&2; usage >&2; exit 2 ;;
+  esac
+done
+
+# ---------------------------------------------------------------------------
+# Resolve the pinned tag from the private overlay (if it exists).
+# ---------------------------------------------------------------------------
+pin_tag="(none)"
+if [[ -n "$PIN" && -f "$PIN" ]]; then
+  pin_tag="$(tr -d '[:space:]' < "$PIN")"
+  [[ -n "$pin_tag" ]] || pin_tag="(empty)"
+fi
+
+# ---------------------------------------------------------------------------
+# Determine the upstream release tag. Best-effort fetch; read-only otherwise.
+# ---------------------------------------------------------------------------
+up_tag="(none)"
+if [[ -d "$UPSTREAM/.git" ]]; then
+  if [[ "$DO_FETCH" == "1" ]]; then
+    # Fetch is read-only with respect to the working tree and is the intake
+    # step for community changes. Never modifies the overlay or any product repo.
+    ( cd "$UPSTREAM" && git fetch origin --tags --quiet 2>/dev/null \
+      || log "note: git fetch origin failed or offline; using local refs" )
+  fi
+  up_tag="$(cd "$UPSTREAM" && { git describe --tags --abbrev=0 origin/main 2>/dev/null \
+    || git describe --tags --abbrev=0 2>/dev/null; } || true)"
+  [[ -n "$up_tag" ]] || up_tag="(none)"
+fi
+
+# ---------------------------------------------------------------------------
+# Report version coupling.
+# ---------------------------------------------------------------------------
+log "agent-fleet-doctrine doctrine-sync"
+log "  upstream release tag : $up_tag"
+log "  overlay doctrine-pin : $pin_tag"
+
+status="in sync (no upgrade pending)"
+if [[ "$pin_tag" == "(none)" || "$pin_tag" == "(empty)" || "$pin_tag" == "(unset)" ]]; then
+  status="NO PIN — overlay doctrine-pin is missing; set it to the release tag"
+elif [[ "$up_tag" == "(none)" ]]; then
+  status="UNKNOWN UPSTREAM TAG — could not resolve a public release tag"
+elif [[ "$pin_tag" == "$up_tag" ]]; then
+  status="in sync (no upgrade pending)"
+else
+  status="PENDING UPGRADE — installed pin $pin_tag; upstream is $up_tag. Test the overlay against $up_tag before adopting."
+fi
+log "  status             : $status"
+
+if [[ "$pin_tag" != "(none)" && "$pin_tag" != "(empty)" && "$pin_tag" != "(unset)" && -n "$up_tag" && "$up_tag" != "(none)" && "$pin_tag" != "$up_tag" ]]; then
+  # surface as a pending, testable step — do not auto-apply
+  log "  (run the overlay's own test, then bump doctrine-pin to adopt)"
+fi
+
+# ---------------------------------------------------------------------------
+# Describe the install (dry-run lists; --apply copies).
+# ---------------------------------------------------------------------------
+# Normalize a leading ~ in the target (typical $HOME expansion, safe because we
+# never allow shell globbing of the remote/overlay paths).
+TARGET_RESOLVED="$TARGET"
+case "$TARGET_RESOLVED" in
+  ~/*) TARGET_RESOLVED="$HOME/${TARGET_RESOLVED#~/}" ;;
+esac
+
+log ""
+log "  install target      : $TARGET_RESOLVED"
+log "  core set            : ${CORE_PATHS[*]}"
+
+present=()
+for p in "${CORE_PATHS[@]}"; do
+  [[ -e "$REPO_ROOT/$p" ]] && present+=("$p")
+done
+missing=()
+for p in "${CORE_PATHS[@]}"; do
+  [[ -e "$REPO_ROOT/$p" ]] || missing+=("$p")
+done
+
+log "  files from this repo: ${present[*]:-(none)}"
+if [[ "${#missing[@]}" -gt 0 ]]; then
+  log "  not present (skip): ${missing[*]}"
+fi
+
+if [[ "$APPLY" == "1" ]]; then
+  if [[ -z "$present" || "${#present[@]}" == "0" ]]; then
+    log "ERROR: no public core found in $REPO_ROOT; nothing to install" >&2
+    exit 1
+  fi
+  mkdir -p "$TARGET_RESOLVED"
+  for p in "${present[@]}"; do
+    # Copy overwrites in place (idempotent). We do NOT delete anything — this
+    # script never is destructive. A removed-upstream file would linger rather
+    # than be deleted; that is the safe trade-off we accept.
+    cp -R "$REPO_ROOT/$p" "$TARGET_RESOLVED/"
+    log "  installed: $p"
+  done
+  log "installed public core into $TARGET_RESOLVED"
+  log "note: the private overlay(s) were left untouched."
+else
+  log "dry-run — nothing changed. Re-run with --apply to install."
+fi
+
+exit 0
