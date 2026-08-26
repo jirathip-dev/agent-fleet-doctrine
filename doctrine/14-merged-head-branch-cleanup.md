@@ -22,6 +22,26 @@ it pollutes the remote refs, confuses cleanup tooling, and every subsequent
   reconcile drift, but it repairs the failure of merge-time deletes; it does
   not replace them.
 
+## Merged lane workspaces
+
+A merged PR's *lane workspace* is removed too — deterministically, as part of
+the same hygiene step, never left parked indefinitely. Rules:
+
+- **Archive, don't delete, local-only files.** Lane-local notes, prompts, and
+  local settings are inputs, not outputs (the evidence was delivered in review
+  and the PR/issue). Archive them with a manifest (path + hash), then remove
+  the workspace. Credential-class local files (keys, certs, env configs,
+  local settings) are **never silently destroyed** — they are archived, and
+  removal never depends on deleting them.
+- **Real uncommitted changes trigger salvage, not deletion.** If a merged
+  workspace carries actual tracked modifications, stop and salvage: review
+  them, fold into an issue or discard deliberately — never let a sweep delete
+  them.
+- **Verification before removal, always.** Workspace removal requires the same
+  proofs as branch deletion: ancestor-of-integration, remote ref gone, no live
+  agent/session inside, and no uncommitted work. "Probably merged" is not a
+  proof.
+
 ## Signals that drift already happened
 
 - Remote head refs that correspond to PRs closed as merged.

@@ -28,7 +28,7 @@ Fleet orchestration discipline. Load this whenever you will run more than one co
 11. **Brief/manifest composition.** Self-contained brief; role, model, skills, brief, harness are separate axes, composed in a fixed order. Long briefs go in files, not inline prompts.
 12. **Status reporting.** Four buckets — integrated/shipped, produced-not-integrated, in flight, unverified/blockers. Derive totals with commands, never mentally.
 13. **Skill selection.** Worker context carries explicitly selected, narrow skills (a separate axis from role/model). Role-gated; never blanket-injected; static default + named override; a lane that should have gotten a skill but didn't is a spawn defect.
-14. **Merged-head cleanup.** A merged PR's head branch is deleted at merge time and verified gone. Merged-branch rot is a hygiene failure, not an accepted backlog; sweeps repair but never replace the merge-time delete.
+14. **Merged-head cleanup.** A merged PR's head branch is deleted at merge time and verified gone; its lane workspace is removed deterministically after merge (local-only files archived with a manifest, credential-class files never silently destroyed, real uncommitted changes salvaged, never auto-deleted). Merged-branch rot is a hygiene failure, not an accepted backlog; sweeps repair but never replace the merge-time delete.
 
 ## Boundaries
 
