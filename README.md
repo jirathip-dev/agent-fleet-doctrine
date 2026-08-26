@@ -24,6 +24,8 @@ The individual techniques here are well known and scattered across docs and blog
 10. **Issue hygiene.** File a new issue for every discovery. Never bury a finding in a PR body.
 11. **Brief/manifest composition.** A self-contained brief is a contract; role, model, skills, brief, and harness are separate axes composed in a fixed order. Long briefs go in files, not inline prompts.
 12. **Status reporting.** Report in four buckets — integrated/shipped, produced-not-integrated, in flight, unverified/blockers — and derive every total with a command, never from memory.
+13. **Skill selection.** Worker context carries explicitly selected, narrow skills (a separate axis from role/model); role-gated, never blanket-injected.
+14. **Merged-head cleanup.** A merged PR's head branch is deleted at merge time and verified gone; merged-branch rot is a hygiene failure, not an accepted backlog.
 
 ## Install
 
