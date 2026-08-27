@@ -34,13 +34,13 @@ The **orchestrator** watches CI and merges when it is green — the conductor do
 
 A CI run that is a **duplicate of the same head** (e.g. both a push-event and a pull_request-event run for one SHA) can produce a stuck/cancelled run that returns a transient failure while the real required checks are already green. Verify the merge is actually safe independent of the stuck run: confirm the required `pull_request` checks are `completed/success` and the PR's `mergeable` is `MERGEABLE`. If the only laggard is a duplicate run, that run is not a merge gate — do not let the orchestrator burn its whole loop retrying it.
 
-## The approval gate (hard rule)
+## The approval gate (standing authority)
 
-No mutations to GitHub state — repos, issues, PRs, merges, releases — without explicit human approval. Read-only discovery is always fine. Say what you are about to change and wait.
+The orchestrator holds a **standing authority** for its briefed loop's internal steps: issue mutation as briefed, branch push, and the merge of a reviewed, CI-green PR to the integration branch. No per-PR human approval is required for integration-branch merges — asking per PR is the wrong default. When the merge warrant holds (all green at one head, correct integration branch), the orchestrator merges and reports.
 
-This gate governs the **orchestrator-side** (conductor, orchestrator CLI, `gh`). Workers may mutate issues as part of their briefed task (issue mutation is not a repo mutation subject to this gate), but they never merge, release, or rename.
+The human gate remains for: **promotion to production main** (no agent flips it), spend, destructive operations, scope changes, and any GitHub mutation outside the orchestrator's briefed loop.
 
-A human saying "get this done" or "run the loop" is **not** an override of the approval gate. Promotion to production main is specifically human-only; no agent flips it.
+Workers never merge, release, or rename; issue mutation inside a worker's briefed task is fine. Read-only discovery is always fine. "Get this done" or "run the loop" is not a license to skip the human gate above.
 
 ## Scope discipline
 
