@@ -36,11 +36,18 @@ A CI run that is a **duplicate of the same head** (e.g. both a push-event and a 
 
 ## The approval gate (standing authority)
 
-The orchestrator holds a **standing authority** for its briefed loop's internal steps: issue mutation as briefed, branch push, and the merge of a reviewed, CI-green PR to the integration branch. No per-PR human approval is required for integration-branch merges — asking per PR is the wrong default. When the merge warrant holds (all green at one head, correct integration branch), the orchestrator merges and reports.
+The orchestrator holds a **standing authority** for its briefed loop's internal steps: issue mutation as briefed, pushes of its own integration/promotion branches, and the merge of a reviewed, CI-green PR to the integration branch. No per-PR human approval is required for integration-branch merges — asking per PR is the wrong default. When the merge warrant holds (all green at one head, correct integration branch), the orchestrator merges and reports.
 
 The human gate remains for: **promotion to production main** (no agent flips it), spend, destructive operations, scope changes, and any GitHub mutation outside the orchestrator's briefed loop.
 
 Workers never merge, release, or rename; issue mutation inside a worker's briefed task is fine. Read-only discovery is always fine. "Get this done" or "run the loop" is not a license to skip the human gate above.
+
+## Delivery contract — who pushes what
+
+- **The worker pushes its own branch.** After gates pass it commits, pushes `origin/<branch>`, and reports the exact SHA. A local-only committed head is **not delivered**: treat an idle/done worker with an unpushed head as a stalled delivery — prompt it once to push, escalate if it repeats.
+- **The orchestrator owns**: opening the PR, spawning the fresh reviewer, waiting on hosted CI, and merging a reviewed, green PR to integration. It never waits for its own push of worker work — it waits on the worker's pushed branch with event-driven waits (`agent wait`, `gh pr checks --watch`); fixed long sleep loops are banned.
+- **Reviewers are read-only**: no commits, no pushes, no merges.
+- Exception: documented mechanical pushes (report-only commits, promotion branches) belong to the orchestrator, not to workers.
 
 ## Scope discipline
 
