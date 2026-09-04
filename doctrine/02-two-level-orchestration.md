@@ -16,7 +16,7 @@ conductor
 
 - **Orchestrator.** One per repo or workstream, owned by the workstream, sitting in the primary checkout on the integration branch. It is the **single integrator**. It owns the entire worker lifecycle: resolving the brief, fanning out workers into isolated worktrees, watching their status, collecting their artifacts, running the gates, opening the PR, waiting for CI, merging once, and cleaning up. Workers never self-integrate.
 
-- **Worker.** An implementer or reviewer in its own isolated worktree. It does exactly what its brief says, produces an artifact, and exits. It may mutate issues as briefed, but it never merges, releases, or renames. Merges are the orchestrator's job; promotion to production main is the human's.
+- **Worker.** An implementer or reviewer in its own isolated worktree. It does exactly what its brief says, produces an artifact, and exits. It may mutate issues as briefed, but it never merges, releases, or renames. Merges are the orchestrator's job; the integration-to-production promotion/release is the human's.
 
 ## Why two levels, not one
 

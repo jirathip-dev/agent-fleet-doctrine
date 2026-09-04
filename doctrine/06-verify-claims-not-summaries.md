@@ -32,7 +32,7 @@ A green PR is not proof of a complete delivery. The full acceptance bar is:
 4. the merge landed on the **intended integration branch** (not a neighbor, not main by accident);
 5. every post-merge deployment workflow passed, **including per-unit results** — a deploy-all job can report green while leaving one unit on stale code, so inspect per-function/per-app summaries, not just the aggregate;
 6. the issue contains the evidence and the task worktrees are clean/removed;
-7. no production/main promotion unless explicitly human-led.
+7. no integration-to-production promotion/release unless explicitly human-led — an orchestrator merge to a `main`-named integration branch is an integration merge, not a promotion.
 
 Check `git branch --contains <sha>`, the merged PR's exact head, and per-unit deployment output — never an agent summary. If any deployment unit is still on an old version, keep the issue open and drive an additive corrective change through the same review/verify loop.
 

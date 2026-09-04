@@ -19,7 +19,7 @@ The individual techniques here are well known and scattered across docs and blog
 5. **Verify claims, not summaries.** A worker saying "tests pass" is a claim, not a fact. Check the diff, the exact runner, the commit, and the CI.
 6. **Gauntlet loop.** Set a real, fetchable bar; run a builder against a harsh critic; compare blind; loop until ours wins. Never let the builder grade itself.
 7. **Self-exit policy.** Workers exit when done (their artifact is the proof). The orchestrator never exits mid-batch; it stays alive through merge + cleanup.
-8. **Merge gates.** Feature branches merge to the integration branch after review + CI. Promotion to production main is human-only.
+8. **Merge gates.** Feature branches merge to the repo's policy-designated integration branch (which may be named `main`) after review + CI. The separate integration-to-production promotion/release is human-only.
 9. **Docs sync.** Documentation is part of the task, not a follow-up. Update it in the same change.
 10. **Issue hygiene.** File a new issue for every discovery. Never bury a finding in a PR body.
 11. **Brief/manifest composition.** A self-contained brief is a contract; role, model, skills, brief, and harness are separate axes composed in a fixed order. Long briefs go in files, not inline prompts.
