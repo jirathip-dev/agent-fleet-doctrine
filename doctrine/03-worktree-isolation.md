@@ -43,7 +43,7 @@ Workers often run with permission checks bypassed — no confirmation prompts �
 
 - The worktree is the **execution boundary**: workers may run anything inside their own worktree, and almost nothing outside it.
 - **Never run two agents in the same worktree concurrently.** Isolation is the guardrail; two-on-one defeats it.
-- A permissive worker is still **never authorized to merge, release, or rename**. GitHub mutations are the orchestrator's job (and main promotion is the human's).
+- A permissive worker is still **never authorized to merge, release, or rename**. GitHub mutations are the orchestrator's job (and the integration-to-production promotion/release is the human's).
 - The permissiveness is configured in each worker's own settings, not passed per-start — the configs are the source of truth. Do not restate them as per-run flags.
 
 ## When it breaks

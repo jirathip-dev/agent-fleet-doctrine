@@ -22,7 +22,7 @@ Fleet orchestration discipline. Load this whenever you will run more than one co
 5. **Verify claims, not summaries.** Re-run the tests in the correct lane, check the exact commit/head, check CI. A green subagent report is a claim.
 6. **Gauntlet loop.** Real, fetchable bar. Builder vs harsh critic, blind compare, loop until ours wins. Never a fixed round count.
 7. **Self-exit.** Workers exit on done. Orchestrator stays alive until the batch's merge + cleanup completes.
-8. **Merge gates.** Feature → integration branch after review + CI. Main promotion is human-only.
+8. **Merge gates.** Feature → the repo's policy-designated integration branch (which may be named `main`) after review + CI. The integration-to-production promotion/release is human-only.
 9. **Docs sync.** Docs updated in the same task. `docs: updated` must appear in the verdict.
 10. **Issue hygiene.** New issue for every discovery. `Refs #N`, not `Fixes #N`, when an issue must stay open past a merge.
 11. **Brief/manifest composition.** Self-contained brief; role, model, skills, brief, harness are separate axes, composed in a fixed order. Long briefs go in files, not inline prompts.
@@ -36,7 +36,7 @@ Fleet orchestration discipline. Load this whenever you will run more than one co
 
 - The conductor may gather context, write the plan + brief, obtain approval for GitHub side effects, spawn/rearm the orchestrator, monitor it, and verify the final artifact.
 - The conductor must NOT edit code, steer/stop workers directly, or create parallel worker lanes bypassing the orchestrator.
-- Workers may mutate issues (as briefed) but NEVER merge/release/rename. Merges are the orchestrator's job, and main promotion is the human's.
+- Workers may mutate issues (as briefed) but NEVER merge/release/rename. Merges to the repo's integration branch are the orchestrator's job (whatever that branch is named), and the integration-to-production promotion/release is the human's.
 
 ## Adapters
 
