@@ -16,6 +16,16 @@ A **gauntlet loop** turns any goal into a builder-vs-critic loop against a real,
 
 5. **Live progress.** Keep a visible progress surface (a status board, a markdown progress file, a digest) so the person can watch without being pestered.
 
+## The convergence circuit breaker
+
+A gauntlet loop can fail to converge — the critic keeps finding the same class of gap, each fix spawns a new round, and the loop has no natural end. It must stop and escalate; it must neither run forever nor ship on a timer.
+
+- **Ordinary builder/critic rounds are bounded.** The bound is a **stop trigger**: when repeated non-convergence exhausts it, stop the loop and escalate — do not quietly start another round.
+- **Escalation runs through one bounded recovery round** that is exceptional and separately authorized. It is not an automatic extension of the routine loop; whoever holds the authority for the loop grants it explicitly.
+- **The human queue is for hard stops.** If the bounded recovery also fails to converge, the loop hard-stops to the human queue. Routine recovery — fixing a FAIL's findings and re-running the critic — never requires a human.
+- **The cap is a stop trigger, never a ship timer.** Exhausting it never makes the critic pick ours, and it never replaces risk-specific judgment about whether a loop is converging.
+- **Lineage follows the goal, not the artifacts.** Restarting the same goal under a new branch or PR does not reset the counter (see `15-review-convergence.md`).
+
 ## What breaks it
 
 - **Vague bar** → the critic invents a comparison and approves everything.

@@ -15,9 +15,17 @@ integration branch ──(HUMAN-ONLY ──▶ production / main
 
 ## The gates, concretely
 
-- **All green, at one head.** Independent review approved the final head, local gates passed at that exact head, and hosted CI passed. A green PR body without these is a claim, not a merge warrant.
+- **All green, at one head.** Independent review returned a binary PASS on the final head, local gates passed at that exact head, and hosted CI passed. A green PR body without these is a claim, not a merge warrant.
 - **Merge to the intended branch.** Confirm the merge landed on the integration branch the work targets — not a neighbor, not main by accident. Check `git branch --contains` against the intended branch.
 - **Do not promote main without a human.** The fleet may go as far as the integration branch. It never flips main on its own.
+
+## PASS-only merge
+
+The integration merge requires a **binary review PASS plus green CI at the exact reviewed head** — nothing less, and no other route exists:
+
+- **A failed review never merges.** There is no FAIL-to-merge path; rework must re-PASS at a new head before the change is mergeable again.
+- **Follow-ups and rework never bypass the gates.** Filing a non-blocking follow-up issue does not make a FAILed change mergeable, and neither does returning the change for rework. A **child follow-up issue never makes a failed parent mergeable** — the parent head must itself PASS and be green (see `15-review-convergence.md`).
+- **Follow-ups ship on their own warrant.** A child issue attaches to the parent work with `Refs #N` and ships only through its own reviewed, green PR — never piggybacked on the parent's merge.
 
 ## The `Refs #N` vs `Fixes #N` auto-close gotcha
 
