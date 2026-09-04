@@ -26,6 +26,7 @@ The individual techniques here are well known and scattered across docs and blog
 12. **Status reporting.** Report in four buckets — integrated/shipped, produced-not-integrated, in flight, unverified/blockers — and derive every total with a command, never from memory.
 13. **Skill selection.** Worker context carries explicitly selected, narrow skills (a separate axis from role/model); role-gated, never blanket-injected.
 14. **Merged-head cleanup.** A merged PR's head branch is deleted at merge time and verified gone; its lane workspace is removed deterministically too (local files archived with a manifest, credential-class files never silently destroyed, real uncommitted changes salvaged). Merged-branch rot is a hygiene failure, not an accepted backlog.
+15. **Review convergence.** Quality/PASS is the exit condition; the round budget is only a stop-and-escalate circuit breaker, never a ship timer. Repeated non-convergence stops and escalates through one bounded, separately authorized recovery round to the human queue — routine recovery needs no human. Findings dispose as in-scope blockers (fix before merge), non-blocking follow-ups (filed as linked child issues via `Refs`), or rework/scope change (FAIL + rework). PASS + follow-up and FAIL + rework are distinct outcomes; a child issue never makes a failed parent mergeable, and lineage survives replacement branches/PRs. Merge is PASS-only: review PASS + green CI at the exact reviewed head.
 
 ## Install
 

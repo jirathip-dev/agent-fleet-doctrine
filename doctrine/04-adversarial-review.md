@@ -28,4 +28,20 @@ Inheriting an honest reviewer's uncertainty into main is how unverified code shi
 
 Every review verdict should state clearly: the verdict (PASS/FAIL), the acceptance criteria checked against, what was actually run/verified (with the exact command runner), and any residual risk named explicitly. If a FAIL, say what must change.
 
+## Finding disposition
+
+A reviewer's findings are not a single blob. Each finding gets one of three dispositions, and the verdict says which — details and outcomes in `15-review-convergence.md`:
+
+- **In-scope blocker.** The finding is inside this change's scope or acceptance criteria. The verdict is FAIL until it is fixed at a new head and re-reviewed; it blocks merge.
+- **Non-blocking follow-up.** The finding is real but outside this change's bar. It does not block PASS, and it is not buried in the verdict: it is filed as a linked child issue (`Refs #N` — see `10-issue-hygiene.md`). The outcome is PASS with a tracked follow-up.
+- **Rework / scope change.** The change is pointed wrong or outgrew its brief. FAIL + rework; nothing merges.
+
+An undecided finding blocks the merge: if the verdict does not classify a finding as a non-blocking follow-up, treat it as in scope.
+
+## The reviewed head
+
+A PASS or FAIL is a claim about a **specific head** — the exact commit/state the reviewer examined. Merge requires a binary PASS plus green CI at that same head (see `08-merge-gates.md`): the merge candidate must equal the reviewed head, not a neighbor and not a later push.
+
+Any change after a verdict — a fix, a rebase, even a reword — is a **new, unreviewed head** and returns for fresh-context review before it may merge. Filing a follow-up at review time does not change the reviewed head; fixing a blocker does.
+
 *Next: `05-gauntlet-loop.md`*

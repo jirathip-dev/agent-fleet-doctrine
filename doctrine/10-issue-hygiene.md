@@ -29,6 +29,14 @@ Workers may use the issue-mutation tooling (create/comment/close) as part of the
 
 Reinforcing `01-issue-first-backlog.md`: an issue is closed when its acceptance criteria are met **and** the evidence is in the issue — test output, verification commands, screenshots, a merged PR reference. Otherwise keep it open and say what remains.
 
+## Parent/child follow-ups, rework, and lineage
+
+- **Follow-ups are children.** A non-blocking finding from review is filed as a child issue of the change's parent issue (see `04-adversarial-review.md`, `15-review-convergence.md`), with its own spec and acceptance criteria. Link it with `Refs #N` — never `Fixes #N` / `Closes #N` — when the parent must stay open or the issue is merely surfaced by the work (the hold-open rule, `08-merge-gates.md`).
+- **Group related findings deliberately.** Findings that share one fix or one acceptance bar may be grouped into a single child issue; unrelated findings get separate issues. Search before filing (`01-issue-first-backlog.md`).
+- **Rework is not a follow-up.** A FAIL + rework stays on the parent; the finding is not refiled as a new child issue to clear the FAIL. The parent continues its own lineage until it PASSes at the reviewed head and merges — or the scope change is authorized separately.
+- **Lineage survives replacement.** The round counter and the review history belong to the parent issue, not to a branch or a PR. Closing a PR, deleting a branch, or opening a replacement PR for the same parent does not reset convergence state (`15-review-convergence.md`). Child issues keep their `Refs` lineage to the parent.
+- **Closing stays per-issue and evidence-only.** A child closes when its own acceptance criteria are met with evidence. A parent closes only on its own evidence — binary PASS, green CI at the reviewed head, merged — never because its child issues were filed or closed.
+
 ## A practical rule of thumb
 
 An issue for an existing behavior should name the file:line (or the data/call-path) of the thing being changed *before* you file it. That makes the downstream fix scoped and trustable, and it forces you to actually understand the problem instead of describing a symptom.

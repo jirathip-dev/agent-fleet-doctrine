@@ -33,4 +33,4 @@ In user-facing status, prefer a direct, clickable link over a bare reference —
 
 The conductor applies the same discipline to itself. Its report of what the fleet did is a claim; it should be grounded in the same read-only commands, and it should not inflate "produced, not integrated" into "shipped."
 
-*This is the last chapter. See `../README.md` for the one-page summary.*
+*Next: `13-skill-selection.md`*
