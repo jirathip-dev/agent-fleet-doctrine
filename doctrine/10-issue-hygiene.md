@@ -8,7 +8,7 @@ The issue tracker is the **project log**. Treat it with the same care you treat 
 
 2. **Never bury a finding in a PR body or a chat.** A finding in a PR body is invisible to triage; a finding in a chat is invisible to everyone who was not online. File the issue, link it, leave it open for triage. A good default is that a PR closes one issue and references any others it merely surfaced.
 
-3. **Cross-link with `Refs #N`.** When a PR or a comment relates to an issue without satisfying it, reference it with `Refs #N`. Use `Closes #N` / `Fixes #N` only when the PR actually satisfies the issue — and only when you want it auto-closed (see `08-merge-gates.md` for the hold-open gotcha).
+3. **Satisfying PRs close with `Closes #N` / `Fixes #N`.** Closes by default, Refs for hold-open: a PR that satisfies an issue uses the closing keyword in its title AND body, so the issue closes at merge. Use `Refs #N` when a PR or comment relates to an issue without satisfying it — a surfaced finding, a follow-up, or an issue that must stay open past the merge (`08-merge-gates.md`).
 
 4. **Comment progress.** Issues carry a living narrative. Comment on the issue when state materially changes: work started, findings, verification evidence, blockers, PR opened. A reviewer or later worker should be able to reconstruct the story from the issue alone.
 
@@ -31,7 +31,7 @@ Reinforcing `01-issue-first-backlog.md`: an issue is closed when its acceptance 
 
 ## Parent/child follow-ups, rework, and lineage
 
-- **Follow-ups are children.** A non-blocking finding from review is filed as a child issue of the change's parent issue (see `04-adversarial-review.md`, `15-review-convergence.md`), with its own spec and acceptance criteria. Link it with `Refs #N` — never `Fixes #N` / `Closes #N` — when the parent must stay open or the issue is merely surfaced by the work (the hold-open rule, `08-merge-gates.md`).
+- **Follow-ups are children.** A non-blocking finding from review is filed as a child issue of the change's parent issue (see `04-adversarial-review.md`, `15-review-convergence.md`), with its own spec and acceptance criteria. The child links to the parent with `Refs #N` — the parent's merge merely surfaced it and must not close it — and stays open until its own PR satisfies it. That PR closes the child at merge like any issue (`Closes #N` / `Fixes #N` in title AND body), unless the child is hold-open and uses `Refs #N` (`08-merge-gates.md`).
 - **Group related findings deliberately.** Findings that share one fix or one acceptance bar may be grouped into a single child issue; unrelated findings get separate issues. Search before filing (`01-issue-first-backlog.md`).
 - **Rework is not a follow-up.** A FAIL + rework stays on the parent; the finding is not refiled as a new child issue to clear the FAIL. The parent continues its own lineage until it PASSes at the reviewed head and merges — or the scope change is authorized separately.
 - **Lineage survives replacement.** The round counter and the review history belong to the parent issue, not to a branch or a PR. Closing a PR, deleting a branch, or opening a replacement PR for the same parent does not reset convergence state (`15-review-convergence.md`). Child issues keep their `Refs` lineage to the parent.

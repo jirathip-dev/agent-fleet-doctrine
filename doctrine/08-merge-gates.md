@@ -31,12 +31,10 @@ The integration merge requires a **binary review PASS plus green CI at the exact
 
 ## The `Refs #N` vs `Fixes #N` auto-close gotcha
 
-`Fixes #N` / `Closes #N` in a PR **auto-closes** issue N on merge — even an issue you intend to keep open for downstream verification (e.g. a fix that still needs on-device confirmation). This is a real problem: you merge a fix, and your hold-open issue silently closes.
+**Closes by default, Refs for hold-open.** A PR that satisfies an issue uses `Closes #N` / `Fixes #N` in its title AND body, so the issue closes at merge. The gotcha is the hold-open case: a closing keyword auto-closes issue N on merge even when the issue must stay open past the merge — human-gated apply, promotion, on-device verification, live acceptance, future-gated design review. You merge a fix, and your hold-open issue silently closes.
 
-Two guards:
-
-- **If an issue must stay open past a merge, the PR must use `Refs #N`, never `Fixes`/`Closes #N`.**
-- **Reopening an auto-closed issue is a mutation** — it needs the human's approval, not a unilateral agent action. If you see the mismatch, surface it, don't silently reopen.
+- **Hold-open issues get `Refs #N`, never a closing keyword.** If an issue must stay open past a merge, the PR uses `Refs #N` in title AND body; the orchestrator does not close it, and the issue records its human gate so nobody re-closes it later.
+- **Auto-close is verified after every merge, fail-open.** Auto-close is convenient, not reliable: after a merge, check the issue's state (`gh issue view N --json state`). If it should be closed but is not, close it with evidence. If it should be open but an auto-close closed it, the owner's orchestrator reopens it, corrects the record, and surfaces the mismatch to the issue's human owner. Reopening a wrongly auto-closed issue is the owner's post-merge verification of its own issue — not a unilateral agent mutation of someone else's; surface those to their owner rather than silently reopening them.
 
 ## CI ownership
 
